@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,10 +53,12 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <div className="text-4xl mb-4">🏛️</div>
-          <h1 className="text-3xl font-bold text-foreground">
-            Civic Portal
-          </h1>
+          <Link to="/" className="inline-block">
+            <div className="text-4xl mb-4">🏛️</div>
+            <h1 className="text-3xl font-bold text-foreground">
+              Civic Portal
+            </h1>
+          </Link>
           <p className="text-muted-foreground mt-2">
             Report and manage civic issues in your community
           </p>
@@ -133,12 +135,34 @@ const Login = () => {
             </div>
 
             <div className="mt-6 text-center">
+              <p className="text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <Link 
+                  to="/auth/signup" 
+                  className="font-medium text-primary hover:underline"
+                >
+                  Sign up here
+                </Link>
+              </p>
+            </div>
+
+            <div className="mt-6 text-center">
               <p className="text-xs text-muted-foreground">
                 This is a demonstration system. In production, proper authentication would be implemented.
               </p>
             </div>
           </CardContent>
         </Card>
+
+        {/* Back to Home */}
+        <div className="text-center">
+          <Link 
+            to="/" 
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ← Back to Home
+          </Link>
+        </div>
       </div>
     </div>
   );

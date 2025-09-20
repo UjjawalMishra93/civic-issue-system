@@ -4,8 +4,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
+// Pages
+import Index from "./pages/Index";
+
 // Auth Pages
 import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
 
 // Citizen Pages
 import CitizenDashboard from "./pages/citizen/Dashboard";
@@ -29,11 +33,12 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Root redirect to login */}
-          <Route path="/" element={<Navigate to="/auth/login" replace />} />
+          {/* Home page */}
+          <Route path="/" element={<Index />} />
           
           {/* Authentication Routes */}
           <Route path="/auth/login" element={<Login />} />
+          <Route path="/auth/signup" element={<Signup />} />
           
           {/* Citizen Routes */}
           <Route path="/citizen/dashboard" element={<CitizenDashboard />} />
