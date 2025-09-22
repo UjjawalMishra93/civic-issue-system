@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import Map from "@/components/common/Map";
 import { categories } from "@/data/dummyData";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FormData {
   title: string;
@@ -37,7 +38,7 @@ const IssueForm = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Basic validation
@@ -50,14 +51,56 @@ const IssueForm = () => {
       return;
     }
 
-    // Simulate form submission
-    toast({
-      title: "Issue Reported Successfully",
-      description: "Your issue has been submitted and will be reviewed by our team.",
-    });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to report an issue.",
+          variant: "destructive",
+        });
+        navigate('/auth/login');
+        return;
+      }
 
-    // Navigate back to dashboard
-    navigate('/citizen/dashboard');
+      const { error } = await supabase
+        .from('issues')
+        .insert({
+          title: formData.title,
+          description: formData.description,
+          category: formData.category,
+          priority: formData.priority,
+          location: formData.location,
+          user_id: user.id,
+          citizen_name: user.email || 'Anonymous'
+        });
+
+      if (error) {
+        console.error('Error submitting issue:', error);
+        toast({
+          title: "Error",
+          description: "Failed to submit issue. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Issue Reported Successfully",
+        description: "Your issue has been submitted and will be reviewed by our team.",
+      });
+
+      // Navigate back to dashboard
+      navigate('/citizen/dashboard');
+    } catch (error) {
+      console.error('Error submitting issue:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

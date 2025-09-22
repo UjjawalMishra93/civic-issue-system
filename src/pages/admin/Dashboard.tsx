@@ -1,13 +1,65 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/common/Header";
 import IssueTable from "@/components/admin/IssueTable";
-import { dummyIssues } from "@/data/dummyData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface Issue {
+  id: string;
+  title: string;
+  description: string;
+  status: 'Pending' | 'In Progress' | 'Resolved';
+  category: string;
+  priority: 'Low' | 'Medium' | 'High';
+  location: string;
+  photo_url?: string;
+  citizen_name?: string;
+  user_id?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 const AdminDashboard = () => {
-  const [issues] = useState(dummyIssues);
+  const [issues, setIssues] = useState<Issue[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchIssues();
+  }, []);
+
+  const fetchIssues = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('issues')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching issues:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load issues. Please refresh the page.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setIssues((data || []) as Issue[]);
+    } catch (error) {
+      console.error('Error fetching issues:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while loading issues.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Calculate statistics
   const stats = {
@@ -28,6 +80,19 @@ const AdminDashboard = () => {
     acc[issue.category] = (acc[issue.category] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <div className="text-lg text-muted-foreground">Loading issues...</div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -122,19 +187,19 @@ const AdminDashboard = () => {
           </TabsList>
 
           <TabsContent value="all">
-            <IssueTable issues={issues} />
+            <IssueTable issues={issues} onIssueUpdate={fetchIssues} />
           </TabsContent>
 
           <TabsContent value="pending">
-            <IssueTable issues={pendingIssues} />
+            <IssueTable issues={pendingIssues} onIssueUpdate={fetchIssues} />
           </TabsContent>
 
           <TabsContent value="in-progress">
-            <IssueTable issues={inProgressIssues} />
+            <IssueTable issues={inProgressIssues} onIssueUpdate={fetchIssues} />
           </TabsContent>
 
           <TabsContent value="resolved">
-            <IssueTable issues={resolvedIssues} />
+            <IssueTable issues={resolvedIssues} onIssueUpdate={fetchIssues} />
           </TabsContent>
         </Tabs>
       </main>

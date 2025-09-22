@@ -1,16 +1,32 @@
-import { Issue } from "@/data/dummyData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Issue {
+  id: string;
+  title: string;
+  description: string;
+  status: 'Pending' | 'In Progress' | 'Resolved';
+  category: string;
+  priority: 'Low' | 'Medium' | 'High';
+  location: string;
+  photo_url?: string;
+  citizen_name?: string;
+  user_id?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 interface IssueTableProps {
   issues: Issue[];
+  onIssueUpdate?: () => void;
 }
 
-const IssueTable = ({ issues }: IssueTableProps) => {
+const IssueTable = ({ issues, onIssueUpdate }: IssueTableProps) => {
   const { toast } = useToast();
 
   const getStatusColor = (status: Issue['status']) => {
@@ -39,11 +55,40 @@ const IssueTable = ({ issues }: IssueTableProps) => {
     }
   };
 
-  const handleStatusChange = (issueId: string, newStatus: string) => {
-    toast({
-      title: "Status Updated",
-      description: `Issue ${issueId} status changed to ${newStatus}`,
-    });
+  const handleStatusChange = async (issueId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('issues')
+        .update({ status: newStatus })
+        .eq('id', issueId);
+
+      if (error) {
+        console.error('Error updating status:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update issue status. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Status Updated",
+        description: `Issue ${issueId} status changed to ${newStatus}`,
+      });
+
+      // Refresh the issues list
+      if (onIssueUpdate) {
+        onIssueUpdate();
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while updating the status.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAssignStaff = (issueId: string) => {
