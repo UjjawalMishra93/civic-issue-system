@@ -1,22 +1,24 @@
 import { Issue } from "@/data/dummyData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import Button from "../common/Button";
-import { toast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface TaskCardProps {
   task: Issue;
 }
 
 const TaskCard = ({ task }: TaskCardProps) => {
+  const { toast } = useToast();
+
   const getPriorityColor = (priority: Issue['priority']) => {
     switch (priority) {
       case 'High':
-        return 'bg-destructive text-destructive-foreground';
+        return 'bg-destructive/10 text-destructive hover:bg-destructive/20';
       case 'Medium':
-        return 'bg-warning text-warning-foreground';
+        return 'bg-warning/10 text-warning hover:bg-warning/20';
       case 'Low':
-        return 'bg-muted text-muted-foreground';
+        return 'bg-success/10 text-success hover:bg-success/20';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -25,112 +27,89 @@ const TaskCard = ({ task }: TaskCardProps) => {
   const handleStartTask = () => {
     toast({
       title: "Task Started",
-      description: `You've started working on issue #${task.id}`,
+      description: `Started working on: ${task.title}`,
     });
   };
 
   const handleCompleteTask = () => {
     toast({
       title: "Task Completed",
-      description: `Issue #${task.id} has been marked as resolved`,
+      description: `Completed task: ${task.title}`,
     });
   };
 
   const handleAddUpdate = () => {
     toast({
       title: "Update Added",
-      description: "Progress update has been recorded",
+      description: `Progress update added for: ${task.title}`,
     });
   };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      year: 'numeric'
     });
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow duration-200">
+    <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg font-semibold text-card-foreground">
-              {task.title}
-            </CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              Task ID: #{task.id}
-            </p>
-          </div>
+        <div className="flex items-start justify-between">
+          <CardTitle className="text-lg line-clamp-2">{task.title}</CardTitle>
           <Badge className={getPriorityColor(task.priority)}>
-            {task.priority} Priority
+            {task.priority}
           </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <p className="text-sm text-foreground">
-            {task.description}
-          </p>
-        </div>
+        <p className="text-muted-foreground text-sm line-clamp-3">
+          {task.description}
+        </p>
         
-        <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground bg-muted/30 p-3 rounded-md">
+        <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="font-medium">Category:</span>
-            <p>{task.category}</p>
+            <span className="font-medium text-foreground">Category:</span>
+            <p className="text-muted-foreground">{task.category}</p>
           </div>
           <div>
-            <span className="font-medium">Location:</span>
-            <p>{task.location}</p>
+            <span className="font-medium text-foreground">Location:</span>
+            <p className="text-muted-foreground">{task.location}</p>
           </div>
           <div>
-            <span className="font-medium">Reported by:</span>
-            <p>{task.citizen_name}</p>
+            <span className="font-medium text-foreground">Reporter:</span>
+            <p className="text-muted-foreground">{task.citizen_name}</p>
           </div>
           <div>
-            <span className="font-medium">Date Assigned:</span>
-            <p>{formatDate(task.created_at)}</p>
+            <span className="font-medium text-foreground">Date:</span>
+            <p className="text-muted-foreground">{formatDate(task.created_at)}</p>
           </div>
         </div>
 
-        <div className="border-t pt-4">
-          <div className="flex flex-wrap gap-2">
-            {task.status === 'Pending' && (
-              <Button 
-                variant="primary" 
-                size="sm"
-                onClick={handleStartTask}
-              >
-                Start Task
-              </Button>
-            )}
-            {task.status === 'In Progress' && (
-              <>
-                <Button 
-                  variant="success" 
-                  size="sm"
-                  onClick={handleCompleteTask}
-                >
-                  Mark Complete
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="sm"
-                  onClick={handleAddUpdate}
-                >
-                  Add Update
-                </Button>
-              </>
-            )}
-            <Button 
-              variant="secondary" 
-              size="sm"
-              onClick={() => window.open(`https://maps.google.com/search/${encodeURIComponent(task.location)}`, '_blank')}
-            >
-              📍 View Location
+        <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
+          {task.status === 'Pending' && (
+            <Button size="sm" onClick={handleStartTask}>
+              Start Task
             </Button>
-          </div>
+          )}
+          {task.status === 'In Progress' && (
+            <>
+              <Button size="sm" onClick={handleCompleteTask}>
+                Complete
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleAddUpdate}>
+                Add Update
+              </Button>
+            </>
+          )}
+          <Button size="sm" variant="outline">
+            📍 View Location
+          </Button>
+        </div>
+
+        <div className="text-xs text-muted-foreground">
+          Task ID: #{task.id}
         </div>
       </CardContent>
     </Card>

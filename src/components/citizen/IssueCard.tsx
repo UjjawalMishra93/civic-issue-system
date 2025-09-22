@@ -10,11 +10,11 @@ const IssueCard = ({ issue }: IssueCardProps) => {
   const getStatusColor = (status: Issue['status']) => {
     switch (status) {
       case 'Pending':
-        return 'bg-warning text-warning-foreground';
+        return 'bg-warning/10 text-warning hover:bg-warning/20';
       case 'In Progress':
-        return 'bg-primary text-primary-foreground';
+        return 'bg-primary/10 text-primary hover:bg-primary/20';
       case 'Resolved':
-        return 'bg-success text-success-foreground';
+        return 'bg-success/10 text-success hover:bg-success/20';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -23,11 +23,11 @@ const IssueCard = ({ issue }: IssueCardProps) => {
   const getPriorityColor = (priority: Issue['priority']) => {
     switch (priority) {
       case 'High':
-        return 'bg-destructive text-destructive-foreground';
+        return 'bg-destructive/10 text-destructive hover:bg-destructive/20';
       case 'Medium':
-        return 'bg-warning text-warning-foreground';
+        return 'bg-warning/10 text-warning hover:bg-warning/20';
       case 'Low':
-        return 'bg-muted text-muted-foreground';
+        return 'bg-success/10 text-success hover:bg-success/20';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -35,20 +35,18 @@ const IssueCard = ({ issue }: IssueCardProps) => {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      year: 'numeric'
     });
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow duration-200">
+    <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg font-semibold text-card-foreground">
-            {issue.title}
-          </CardTitle>
-          <div className="flex gap-2">
+        <div className="flex items-start justify-between">
+          <CardTitle className="text-lg line-clamp-2">{issue.title}</CardTitle>
+          <div className="flex flex-col gap-2 ml-4">
             <Badge className={getStatusColor(issue.status)}>
               {issue.status}
             </Badge>
@@ -59,26 +57,27 @@ const IssueCard = ({ issue }: IssueCardProps) => {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm line-clamp-3">
           {issue.description}
         </p>
         
-        <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground">
+        <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="font-medium">Category:</span>
-            <p>{issue.category}</p>
+            <span className="font-medium text-foreground">Category:</span>
+            <p className="text-muted-foreground">{issue.category}</p>
           </div>
           <div>
-            <span className="font-medium">Location:</span>
-            <p>{issue.location}</p>
+            <span className="font-medium text-foreground">Location:</span>
+            <p className="text-muted-foreground">{issue.location}</p>
           </div>
-          <div>
-            <span className="font-medium">Reported:</span>
-            <p>{formatDate(issue.created_at)}</p>
+        </div>
+
+        <div className="flex justify-between items-center pt-2 border-t border-border">
+          <div className="text-xs text-muted-foreground">
+            Reported: {formatDate(issue.created_at)}
           </div>
-          <div>
-            <span className="font-medium">Issue ID:</span>
-            <p>#{issue.id}</p>
+          <div className="text-xs text-muted-foreground">
+            ID: #{issue.id}
           </div>
         </div>
       </CardContent>

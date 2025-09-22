@@ -1,26 +1,36 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Input from "../common/Input";
-import Button from "../common/Button";
-import Map from "../common/Map";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import Map from "@/components/common/Map";
 import { categories } from "@/data/dummyData";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
+
+interface FormData {
+  title: string;
+  description: string;
+  category: string;
+  priority: string;
+  location: string;
+}
 
 const IssueForm = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    category: "",
-    location: "",
-    priority: "Medium" as const
+  const { toast } = useToast();
+  
+  const [formData, setFormData] = useState<FormData>({
+    title: '',
+    description: '',
+    category: '',
+    priority: '',
+    location: ''
   });
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -31,10 +41,10 @@ const IssueForm = () => {
     e.preventDefault();
     
     // Basic validation
-    if (!formData.title || !formData.description || !formData.category) {
+    if (!formData.title || !formData.description || !formData.category || !formData.priority || !formData.location) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields.",
+        description: "Please fill in all required fields",
         variant: "destructive",
       });
       return;
@@ -43,48 +53,42 @@ const IssueForm = () => {
     // Simulate form submission
     toast({
       title: "Issue Reported Successfully",
-      description: "Your civic issue has been submitted for review.",
+      description: "Your issue has been submitted and will be reviewed by our team.",
     });
 
     // Navigate back to dashboard
-    setTimeout(() => {
-      navigate('/citizen/dashboard');
-    }, 1500);
+    navigate('/citizen/dashboard');
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-card-foreground">
-            Report a Civic Issue
-          </CardTitle>
-          <p className="text-muted-foreground">
-            Help improve your community by reporting issues that need attention.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Title */}
+    <Card className="max-w-4xl mx-auto">
+      <CardHeader>
+        <CardTitle className="text-2xl">Report a Civic Issue</CardTitle>
+        <p className="text-muted-foreground">
+          Help us improve your community by reporting issues that need attention.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Title */}
+          <div className="space-y-2">
+            <Label htmlFor="title">Issue Title *</Label>
             <Input
-              label="Issue Title"
-              placeholder="Brief description of the issue"
+              id="title"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
+              placeholder="Brief description of the issue"
               required
             />
+          </div>
 
-            {/* Category */}
+          {/* Category and Priority */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-foreground">
-                Category <span className="text-destructive">*</span>
-              </Label>
-              <Select 
-                value={formData.category} 
-                onValueChange={(value) => handleInputChange('category', value)}
-              >
+              <Label htmlFor="category">Category *</Label>
+              <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
@@ -96,15 +100,11 @@ const IssueForm = () => {
               </Select>
             </div>
 
-            {/* Priority */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-foreground">Priority</Label>
-              <Select 
-                value={formData.priority} 
-                onValueChange={(value) => handleInputChange('priority', value)}
-              >
+              <Label htmlFor="priority">Priority *</Label>
+              <Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Low">Low</SelectItem>
@@ -113,54 +113,55 @@ const IssueForm = () => {
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
-            {/* Location */}
+          {/* Location */}
+          <div className="space-y-2">
+            <Label htmlFor="location">Location *</Label>
             <Input
-              label="Location"
-              placeholder="Address or landmark"
+              id="location"
               value={formData.location}
               onChange={(e) => handleInputChange('location', e.target.value)}
+              placeholder="Street address or landmark"
               required
             />
+          </div>
 
-            {/* Description */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-foreground">
-                Description <span className="text-destructive">*</span>
-              </Label>
-              <Textarea
-                placeholder="Provide detailed information about the issue..."
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                className="min-h-24"
-                required
-              />
-            </div>
+          {/* Description */}
+          <div className="space-y-2">
+            <Label htmlFor="description">Description *</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+              placeholder="Provide detailed information about the issue"
+              rows={4}
+              required
+            />
+          </div>
 
-            {/* Map */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-foreground">Location on Map</Label>
-              <Map height="200px" />
-            </div>
+          {/* Map */}
+          <div className="space-y-2">
+            <Label>Select Location on Map</Label>
+            <Map height="300px" />
+          </div>
 
-            {/* Submit Buttons */}
-            <div className="flex gap-3 pt-4">
-              <Button type="submit" variant="primary" size="lg">
-                Submit Issue Report
-              </Button>
-              <Button 
-                type="button" 
-                variant="secondary" 
-                size="lg"
-                onClick={() => navigate('/citizen/dashboard')}
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+          {/* Action Buttons */}
+          <div className="flex gap-4 pt-4">
+            <Button type="submit" className="flex-1">
+              Submit Issue Report
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => navigate('/citizen/dashboard')}
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 
