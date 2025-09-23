@@ -1,16 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { signIn, user, profile, loading } = useAuth();
   const [credentials, setCredentials] = useState({
     email: "",
     password: ""
   });
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!loading && user && profile) {
+      const role = profile.role || 'citizen';
+      navigate(`/${role}/dashboard`);
+    }
+  }, [user, profile, loading, navigate]);
 
   const handleInputChange = (field: string, value: string) => {
     setCredentials(prev => ({
@@ -19,20 +30,7 @@ const Login = () => {
     }));
   };
 
-  const handleRoleLogin = (role: 'citizen' | 'admin' | 'staff') => {
-    // Simulate login process
-    toast({
-      title: "Login Successful",
-      description: `Welcome back! Redirecting to ${role} dashboard...`,
-    });
-
-    // Navigate to appropriate dashboard
-    setTimeout(() => {
-      navigate(`/${role}/dashboard`);
-    }, 1000);
-  };
-
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!credentials.email || !credentials.password) {
@@ -44,8 +42,48 @@ const Login = () => {
       return;
     }
 
-    // For demo purposes, default to citizen login
-    handleRoleLogin('citizen');
+    setIsLoading(true);
+
+    try {
+      const { error } = await signIn(credentials.email, credentials.password);
+
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          toast({
+            title: "Login Failed",
+            description: "Invalid email or password. Please check your credentials.",
+            variant: "destructive",
+          });
+        } else if (error.message.includes('Email not confirmed')) {
+          toast({
+            title: "Email Not Confirmed",
+            description: "Please check your email and click the confirmation link.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Login Error",
+            description: error.message || "An error occurred during login.",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+
+      toast({
+        title: "Login Successful",
+        description: "Welcome back! Redirecting to your dashboard...",
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Login Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -96,43 +134,12 @@ const Login = () => {
                 variant="primary" 
                 size="lg"
                 className="w-full"
+                disabled={isLoading}
               >
-                Sign In
+                {isLoading ? "Signing In..." : "Sign In"}
               </Button>
             </form>
 
-            {/* Demo Role Buttons */}
-            <div className="mt-6 pt-6 border-t border-border">
-              <p className="text-sm text-muted-foreground text-center mb-4">
-                Demo Access - Choose Your Role:
-              </p>
-              <div className="space-y-2">
-                <Button 
-                  variant="secondary" 
-                  size="md"
-                  className="w-full"
-                  onClick={() => handleRoleLogin('citizen')}
-                >
-                  👤 Login as Citizen
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="md"
-                  className="w-full"
-                  onClick={() => handleRoleLogin('admin')}
-                >
-                  👨‍💼 Login as Admin
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="md"
-                  className="w-full"
-                  onClick={() => handleRoleLogin('staff')}
-                >
-                  🔧 Login as Field Staff
-                </Button>
-              </div>
-            </div>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
@@ -146,11 +153,6 @@ const Login = () => {
               </p>
             </div>
 
-            <div className="mt-6 text-center">
-              <p className="text-xs text-muted-foreground">
-                This is a demonstration system. In production, proper authentication would be implemented.
-              </p>
-            </div>
           </CardContent>
         </Card>
 

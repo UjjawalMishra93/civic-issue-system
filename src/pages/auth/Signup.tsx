@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
@@ -6,9 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { signUp, user, loading } = useAuth();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -17,6 +19,14 @@ const Signup = () => {
     phone: "",
     role: ""
   });
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/citizen/dashboard');
+    }
+  }, [user, loading, navigate]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -25,7 +35,7 @@ const Signup = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Basic validation
@@ -56,16 +66,52 @@ const Signup = () => {
       return;
     }
 
-    // Simulate successful registration
-    toast({
-      title: "Account Created Successfully",
-      description: "Welcome to Civic Portal! You can now sign in.",
-    });
+    setIsLoading(true);
 
-    // Redirect to login
-    setTimeout(() => {
-      navigate('/auth/login');
-    }, 1500);
+    try {
+      const { error } = await signUp(
+        formData.email, 
+        formData.password, 
+        formData.fullName, 
+        formData.role
+      );
+
+      if (error) {
+        if (error.message.includes('User already registered')) {
+          toast({
+            title: "Account Already Exists",
+            description: "An account with this email already exists. Please sign in instead.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Signup Error",
+            description: error.message || "Failed to create account. Please try again.",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+
+      toast({
+        title: "Account Created Successfully",
+        description: "Please check your email for confirmation link before signing in.",
+      });
+
+      // Redirect to login
+      setTimeout(() => {
+        navigate('/auth/login');
+      }, 2000);
+    } catch (error) {
+      console.error('Signup error:', error);
+      toast({
+        title: "Signup Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -160,8 +206,9 @@ const Signup = () => {
                 variant="primary" 
                 size="lg"
                 className="w-full"
+                disabled={isLoading}
               >
-                Create Account
+                {isLoading ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
 

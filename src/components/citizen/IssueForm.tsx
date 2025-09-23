@@ -10,6 +10,8 @@ import Map from "@/components/common/Map";
 import { categories } from "@/data/dummyData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ImageUpload } from "@/components/ui/image-upload";
+import { useAuth } from "@/hooks/useAuth";
 
 interface FormData {
   title: string;
@@ -17,18 +19,21 @@ interface FormData {
   category: string;
   priority: string;
   location: string;
+  photo_url: string;
 }
 
 const IssueForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   
   const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
     category: '',
     priority: '',
-    location: ''
+    location: '',
+    photo_url: ''
   });
 
   const handleInputChange = (field: keyof FormData, value: string) => {
@@ -51,18 +56,17 @@ const IssueForm = () => {
       return;
     }
 
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to report an issue.",
+        variant: "destructive",
+      });
+      navigate('/auth/login');
+      return;
+    }
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({
-          title: "Authentication Required",
-          description: "Please log in to report an issue.",
-          variant: "destructive",
-        });
-        navigate('/auth/login');
-        return;
-      }
 
       const { error } = await supabase
         .from('issues')
@@ -72,6 +76,7 @@ const IssueForm = () => {
           category: formData.category,
           priority: formData.priority,
           location: formData.location,
+          photo_url: formData.photo_url || null,
           user_id: user.id,
           citizen_name: user.email || 'Anonymous'
         });
@@ -182,6 +187,13 @@ const IssueForm = () => {
               required
             />
           </div>
+
+          {/* Image Upload */}
+          <ImageUpload
+            onImageUploaded={(url) => handleInputChange('photo_url', url)}
+            onImageRemoved={() => handleInputChange('photo_url', '')}
+            maxSizeMB={5}
+          />
 
           {/* Map */}
           <div className="space-y-2">
