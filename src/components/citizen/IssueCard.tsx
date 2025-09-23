@@ -1,13 +1,17 @@
-import { Issue } from "@/data/dummyData";
+import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ArrowUp } from "lucide-react";
 
 interface IssueCardProps {
-  issue: Issue;
+  issue: Tables<"issues"> & { issue_upvotes: { user_id: string }[] };
+  onUpvote: (issueId: string) => void;
+  upvoted: boolean;
 }
 
-const IssueCard = ({ issue }: IssueCardProps) => {
-  const getStatusColor = (status: Issue['status']) => {
+const IssueCard = ({ issue, onUpvote, upvoted }: IssueCardProps) => {
+  const getStatusColor = (status: Tables<"issues">['status']) => {
     switch (status) {
       case 'Pending':
         return 'bg-warning/10 text-warning hover:bg-warning/20';
@@ -20,7 +24,7 @@ const IssueCard = ({ issue }: IssueCardProps) => {
     }
   };
 
-  const getPriorityColor = (priority: Issue['priority']) => {
+  const getPriorityColor = (priority: Tables<"issues">['priority']) => {
     switch (priority) {
       case 'High':
         return 'bg-destructive/10 text-destructive hover:bg-destructive/20';
@@ -60,7 +64,7 @@ const IssueCard = ({ issue }: IssueCardProps) => {
         <p className="text-muted-foreground text-sm line-clamp-3">
           {issue.description}
         </p>
-        
+
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="font-medium text-foreground">Category:</span>
@@ -76,8 +80,14 @@ const IssueCard = ({ issue }: IssueCardProps) => {
           <div className="text-xs text-muted-foreground">
             Reported: {formatDate(issue.created_at)}
           </div>
-          <div className="text-xs text-muted-foreground">
-            ID: #{issue.id}
+          <div className="flex items-center gap-2">
+            <Button variant={upvoted ? "primary" : "outline"} size="sm" onClick={() => onUpvote(issue.id)}>
+              <ArrowUp className="h-4 w-4 mr-1" />
+              {issue.issue_upvotes?.length || 0}
+            </Button>
+            <div className="text-xs text-muted-foreground">
+              ID: #{issue.id.substring(0, 8)}
+            </div>
           </div>
         </div>
       </CardContent>

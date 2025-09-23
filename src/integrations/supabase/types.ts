@@ -28,6 +28,8 @@ export type Database = {
           title: string
           updated_at: string
           user_id: string | null
+          district: string | null
+          upvotes: number
         }
         Insert: {
           category: string
@@ -42,6 +44,8 @@ export type Database = {
           title: string
           updated_at?: string
           user_id?: string | null
+          district?: string | null
+          upvotes?: number
         }
         Update: {
           category?: string
@@ -56,8 +60,32 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string | null
+          district?: string | null
+          upvotes?: number
         }
         Relationships: []
+      }
+      issue_upvotes: {
+        Row: {
+          issue_id: string
+          user_id: string
+        }
+        Insert: {
+          issue_id: string
+          user_id: string
+        }
+        Update: {
+          issue_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "issue_upvotes_issue_id_fkey"
+            columns: ["issue_id"]
+            referencedRelation: "issues"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       profiles: {
         Row: {
