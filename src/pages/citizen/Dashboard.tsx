@@ -170,13 +170,13 @@ const CitizenDashboard = () => {
         </div>
 
         <Tabs defaultValue="all" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="all">All Issues</TabsTrigger>
             <TabsTrigger value="my-issues">My Issues</TabsTrigger>
-            <TabsTrigger value="reported">Reported</TabsTrigger>
-            <TabsTrigger value="ai-assigned">AI Assigned</TabsTrigger>
-            <TabsTrigger value="admin-review">Admin Review</TabsTrigger>
-            <TabsTrigger value="assigned-to-staff">Assigned to Staff</TabsTrigger>
+            {/* <TabsTrigger value="reported">Reported</TabsTrigger> */}
+            {/* <TabsTrigger value="ai-assigned">AI Assigned</TabsTrigger> */}
+            {/* <TabsTrigger value="admin-review">Admin Review</TabsTrigger> */}
+            {/* <TabsTrigger value="assigned-to-staff">Assigned to Staff</TabsTrigger> */}
             <TabsTrigger value="resolved">Resolved</TabsTrigger>
           </TabsList>
 
@@ -192,7 +192,7 @@ const CitizenDashboard = () => {
             </div>
           </TabsContent>
           
-          <TabsContent value="reported">
+          {/* <TabsContent value="reported">
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {renderIssueList(filteredIssues.filter(i => i.status === 'Reported'))}
             </div>
@@ -214,7 +214,7 @@ const CitizenDashboard = () => {
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {renderIssueList(filteredIssues.filter(i => i.status === 'Assigned to Staff'))}
             </div>
-          </TabsContent>
+          </TabsContent> */}
 
           <TabsContent value="resolved">
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
