@@ -35,17 +35,14 @@ const Hero = () => {
 
   return (
     <section
-      className="py-20 px-4 sm:px-6 lg:px-8 relative"
-      style={{ backgroundColor: "#F0F2F5" }}
+      className="py-20 px-4 sm:px-6 lg:px-8 relative text-white"
+      style={{
+        backgroundImage: "url(/bghero.png)",
+        backgroundSize: "cover",
+        backgroundPosition: "center top",
+      }}
     >
-      {/* Example animated gradient background */}
-      <div
-        className="absolute inset-0 z-0 pointer-events-none"
-        style={{
-          background: "linear-gradient(120deg, #2F5B8F 0%, #4CAF50 100%)",
-          opacity: 0.08,
-        }}
-      />
+      <div className="absolute inset-0 bg-black opacity-50 z-0" />
       <div className="max-w-7xl mx-auto text-center relative z-10">
         <Badge
           className="mb-4"
@@ -55,14 +52,14 @@ const Hero = () => {
         </Badge>
         <h1
           className="text-4xl md:text-6xl font-bold mb-6 leading-tight"
-          style={{ color: "#2F5B8F" }}
+          style={{ color: "#FFFFFF" }}
         >
           Report Civic Issues.<br />
-          <span style={{ color: "#4CAF50" }}>Build Better Communities.</span>
+          <span>Build Better Communities.</span>
         </h1>
         <p
           className="text-xl mb-8 max-w-3xl mx-auto leading-relaxed"
-          style={{ color: "#212121" }}
+          style={{ color: "#FFFFFF" }}
         >
           Empower citizens to report civic issues, track progress, and create
           positive change in their communities.
@@ -93,12 +90,12 @@ const Hero = () => {
             <div key={index} className="text-center">
               <div
                 className="text-3xl font-bold mb-2"
-                style={{ color: "#2F5B8F" }}
+                style={{ color: "#FFFFFF" }}
               >
                 {stats[index]}
                 {stat.suffix ? stat.suffix : "+"}
               </div>
-              <div className="text-sm" style={{ color: "#616161" }}>
+              <div className="text-sm" style={{ color: "#FFFFFF" }}>
                 {stat.label}
               </div>
             </div>
